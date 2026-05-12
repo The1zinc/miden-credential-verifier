@@ -12,9 +12,9 @@ export default function CreateSwap({ accountId }: CreateSwapProps) {
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const [offeringAsset, setOfferingAsset] = useState("FaucetTokenA");
+  const [offeringAsset, setOfferingAsset] = useState("MIDEN");
   const [offeringAmount, setOfferingAmount] = useState("100");
-  const [requestingAsset, setRequestingAsset] = useState("FaucetTokenB");
+  const [requestingAsset, setRequestingAsset] = useState("POL");
   const [requestingAmount, setRequestingAmount] = useState("50");
 
   async function handleCreateSwap(e: React.FormEvent) {
@@ -96,6 +96,8 @@ export default function CreateSwap({ accountId }: CreateSwapProps) {
                 onChange={(e) => setOfferingAsset(e.target.value)}
                 className="w-full rounded-md border border-emerald-500/30 bg-zinc-950 px-3 py-2.5 text-sm font-medium text-emerald-100 outline-none transition focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/50"
               >
+                <option value="MIDEN">MIDEN</option>
+                <option value="POL">POL</option>
                 <option value="FaucetTokenA">TokenA</option>
                 <option value="FaucetTokenB">TokenB</option>
                 <option value="USDC_TEST">USDC</option>
@@ -116,6 +118,8 @@ export default function CreateSwap({ accountId }: CreateSwapProps) {
                 onChange={(e) => setRequestingAsset(e.target.value)}
                 className="w-full rounded-md border border-emerald-500/30 bg-zinc-950 px-3 py-2.5 text-sm font-medium text-emerald-100 outline-none transition focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/50"
               >
+                <option value="MIDEN">MIDEN</option>
+                <option value="POL">POL</option>
                 <option value="FaucetTokenB">TokenB</option>
                 <option value="FaucetTokenA">TokenA</option>
                 <option value="USDC_TEST">USDC</option>
