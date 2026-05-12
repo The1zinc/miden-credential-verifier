@@ -65,36 +65,36 @@ export default function CreateSwap({ accountId }: CreateSwapProps) {
   }
 
   return (
-    <section className="h-full rounded-xl border border-emerald-500/20 bg-white p-6 shadow-sm dark:bg-zinc-950/50 dark:shadow-[0_0_30px_rgba(16,185,129,0.03)] flex flex-col">
-      <div className="mb-6 flex items-center justify-between border-b border-emerald-500/20 dark:border-emerald-500/10 pb-5">
+    <section className="h-full rounded-xl border border-emerald-500/20 bg-zinc-900/50 p-6 shadow-[0_0_30px_rgba(16,185,129,0.03)] flex flex-col">
+      <div className="mb-6 flex items-center justify-between border-b border-emerald-500/10 pb-5">
         <div>
-          <h2 className="text-xl font-bold text-emerald-700 dark:text-emerald-300">Create Swap Note</h2>
-          <p className="mt-1 text-xs font-medium text-zinc-500 dark:text-zinc-400">Offer an asset to request another</p>
+          <h2 className="text-xl font-bold text-emerald-300">Create Swap Note</h2>
+          <p className="mt-1 text-xs font-medium text-zinc-400">Offer an asset to request another</p>
         </div>
         <ArrowRightLeft className="h-5 w-5 text-emerald-500/50" />
       </div>
 
       {!accountId ? (
         <div className="flex flex-1 flex-col items-center justify-center py-12 text-center">
-          <FileWarning className="mb-4 h-10 w-10 text-zinc-300 dark:text-zinc-700" />
-          <p className="text-sm font-medium text-zinc-500 dark:text-zinc-500">Connect wallet to create a swap note.</p>
+          <FileWarning className="mb-4 h-10 w-10 text-zinc-700" />
+          <p className="text-sm font-medium text-zinc-500">Connect wallet to create a swap note.</p>
         </div>
       ) : (
         <form onSubmit={handleCreateSwap} className="flex flex-1 flex-col justify-between space-y-6">
           <div className="grid grid-cols-2 gap-6">
             <div className="space-y-2">
-              <label className="text-xs font-bold uppercase tracking-wider text-emerald-600/80 dark:text-emerald-300/70">You Offer</label>
+              <label className="text-xs font-bold uppercase tracking-wider text-emerald-300/70">You Offer</label>
               <input 
                 type="number" 
                 required
                 value={offeringAmount}
                 onChange={(e) => setOfferingAmount(e.target.value)}
-                className="w-full rounded-md border border-emerald-500/30 bg-zinc-50 px-3 py-2.5 text-sm font-medium text-zinc-900 outline-none transition focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/50 dark:bg-zinc-900 dark:text-emerald-100"
+                className="w-full rounded-md border border-emerald-500/30 bg-zinc-950 px-3 py-2.5 text-sm font-medium text-emerald-100 outline-none transition focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/50"
               />
               <select 
                 value={offeringAsset}
                 onChange={(e) => setOfferingAsset(e.target.value)}
-                className="w-full rounded-md border border-emerald-500/30 bg-zinc-50 px-3 py-2.5 text-sm font-medium text-zinc-900 outline-none transition focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/50 dark:bg-zinc-900 dark:text-emerald-100"
+                className="w-full rounded-md border border-emerald-500/30 bg-zinc-950 px-3 py-2.5 text-sm font-medium text-emerald-100 outline-none transition focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/50"
               >
                 <option value="FaucetTokenA">TokenA</option>
                 <option value="FaucetTokenB">TokenB</option>
@@ -103,18 +103,18 @@ export default function CreateSwap({ accountId }: CreateSwapProps) {
             </div>
             
             <div className="space-y-2">
-              <label className="text-xs font-bold uppercase tracking-wider text-emerald-600/80 dark:text-emerald-300/70">You Request</label>
+              <label className="text-xs font-bold uppercase tracking-wider text-emerald-300/70">You Request</label>
               <input 
                 type="number" 
                 required
                 value={requestingAmount}
                 onChange={(e) => setRequestingAmount(e.target.value)}
-                className="w-full rounded-md border border-emerald-500/30 bg-zinc-50 px-3 py-2.5 text-sm font-medium text-zinc-900 outline-none transition focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/50 dark:bg-zinc-900 dark:text-emerald-100"
+                className="w-full rounded-md border border-emerald-500/30 bg-zinc-950 px-3 py-2.5 text-sm font-medium text-emerald-100 outline-none transition focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/50"
               />
               <select 
                 value={requestingAsset}
                 onChange={(e) => setRequestingAsset(e.target.value)}
-                className="w-full rounded-md border border-emerald-500/30 bg-zinc-50 px-3 py-2.5 text-sm font-medium text-zinc-900 outline-none transition focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/50 dark:bg-zinc-900 dark:text-emerald-100"
+                className="w-full rounded-md border border-emerald-500/30 bg-zinc-950 px-3 py-2.5 text-sm font-medium text-emerald-100 outline-none transition focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/50"
               >
                 <option value="FaucetTokenB">TokenB</option>
                 <option value="FaucetTokenA">TokenA</option>
@@ -127,12 +127,12 @@ export default function CreateSwap({ accountId }: CreateSwapProps) {
             <button
               type="submit"
               disabled={isCreating}
-              className="w-full inline-flex min-h-[44px] items-center justify-center gap-2 rounded-md bg-emerald-500 px-4 py-2 text-sm font-bold text-white shadow-sm transition hover:bg-emerald-600 disabled:opacity-50 dark:text-zinc-950 dark:hover:bg-emerald-400"
+              className="w-full inline-flex min-h-[44px] items-center justify-center gap-2 rounded-md bg-emerald-500 px-4 py-2 text-sm font-bold text-zinc-950 shadow-sm transition hover:bg-emerald-400 disabled:opacity-50"
             >
               {isCreating ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin" />
-                  Signing via Wallet Extension...
+                  Signing Note...
                 </>
               ) : (
                 "Sign & Broadcast Note"
@@ -140,13 +140,13 @@ export default function CreateSwap({ accountId }: CreateSwapProps) {
             </button>
 
             {success && (
-              <div className="mt-4 rounded-md border border-emerald-500/40 bg-emerald-50 p-3 text-center text-sm font-medium text-emerald-800 dark:border-emerald-500/30 dark:bg-emerald-950/30 dark:text-emerald-200">
+              <div className="mt-4 rounded-md border border-emerald-500/30 bg-emerald-950/30 p-3 text-center text-sm font-medium text-emerald-200">
                 Swap Note successfully created on Testnet!
               </div>
             )}
             
             {error && (
-              <div className="mt-4 rounded-md border border-red-500/40 bg-red-50 p-3 text-center text-sm font-medium text-red-800 dark:border-red-500/30 dark:bg-red-950/30 dark:text-red-200">
+              <div className="mt-4 rounded-md border border-red-500/30 bg-red-950/30 p-3 text-center text-sm font-medium text-red-200">
                 {error}
               </div>
             )}
