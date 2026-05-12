@@ -25,19 +25,10 @@ export default function WalletConnect({ onConnect }: WalletConnectProps) {
     setError(null);
 
     try {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      if (typeof window !== 'undefined' && (window as any).miden) {
-         // Attempt to use extension if injected
-         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-         const accounts = await (window as any).miden.request({ method: 'miden_requestAccounts' });
-         setAccountId(accounts[0]);
-         onConnect(accounts[0]);
-      } else {
-         // Fallback to generating a REAL Miden wallet in the browser via SDK
-         const account = await createMidenWallet();
-         setAccountId(account.id);
-         onConnect(account.id);
-      }
+      // The Miden SDK creates a real Miden wallet in the browser
+      const account = await createMidenWallet();
+      setAccountId(account.id);
+      onConnect(account.id);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not connect to Miden network.");
     } finally {
@@ -46,7 +37,8 @@ export default function WalletConnect({ onConnect }: WalletConnectProps) {
   }
 
   function useDemoWallet() {
-    const id = `MIDEN_SIM_${crypto.randomUUID().slice(0, 8)}`;
+    // Demo wallet must start with miden1 to pass API validation
+    const id = `miden1sim${crypto.randomUUID().replace(/-/g, "").slice(0, 24)}`;
     setAccountId(id);
     setError(null);
     onConnect(id);
