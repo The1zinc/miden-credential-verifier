@@ -25,8 +25,10 @@ export default function WalletConnect({ onConnect }: WalletConnectProps) {
     setError(null);
 
     try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       if (typeof window !== 'undefined' && (window as any).miden) {
          // Attempt to use extension if injected
+         // eslint-disable-next-line @typescript-eslint/no-explicit-any
          const accounts = await (window as any).miden.request({ method: 'miden_requestAccounts' });
          setAccountId(accounts[0]);
          onConnect(accounts[0]);
