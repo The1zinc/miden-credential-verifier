@@ -56,56 +56,65 @@ export default function SwapBoard() {
   }
 
   return (
-    <section className="h-full border border-emerald-500/20 bg-zinc-950 p-5 shadow-[0_0_30px_rgba(16,185,129,0.03)]">
-      <div className="mb-6 flex items-center justify-between border-b border-emerald-500/20 pb-4">
+    <section className="h-full rounded-xl border border-emerald-500/20 bg-white p-6 shadow-sm dark:bg-zinc-950/50 dark:shadow-[0_0_30px_rgba(16,185,129,0.03)] flex flex-col">
+      <div className="mb-6 flex items-center justify-between border-b border-emerald-500/20 dark:border-emerald-500/10 pb-5">
         <div>
-          <h2 className="text-xl font-bold text-emerald-300">Open Swaps</h2>
-          <p className="mt-1 text-xs text-zinc-400">Live P2P Miden Testnet Offers</p>
+          <h2 className="text-xl font-bold text-emerald-700 dark:text-emerald-300">Open Swaps</h2>
+          <p className="mt-1 text-xs font-medium text-zinc-500 dark:text-zinc-400">Live P2P Miden Testnet Offers</p>
         </div>
         <button 
           onClick={fetchSwaps}
-          className="text-xs text-emerald-500 hover:text-emerald-300 transition"
+          className="rounded-full bg-zinc-100 px-3 py-1 text-xs font-bold uppercase tracking-wider text-emerald-600 transition hover:bg-zinc-200 dark:bg-zinc-900 dark:text-emerald-500 dark:hover:bg-zinc-800"
         >
           Refresh
         </button>
       </div>
 
-      <div className="space-y-3 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
+      <div className="flex-1 space-y-3 overflow-y-auto pr-2 custom-scrollbar">
         {isLoading && swaps.length === 0 ? (
-          <div className="flex h-32 flex-col items-center justify-center gap-3 text-emerald-500">
+          <div className="flex h-40 flex-col items-center justify-center gap-3 text-emerald-600 dark:text-emerald-500">
             <Loader2 className="h-6 w-6 animate-spin" />
-            <span className="text-xs uppercase tracking-widest">Loading Board...</span>
+            <span className="text-xs font-bold uppercase tracking-widest">Loading Board...</span>
           </div>
         ) : swaps.length === 0 ? (
-          <div className="flex h-32 items-center justify-center text-sm text-zinc-500">
+          <div className="flex h-40 items-center justify-center text-sm font-medium text-zinc-500">
             No active swaps available.
           </div>
         ) : (
           swaps.map((swap) => (
             <div 
               key={swap.note_id}
-              className="flex flex-col gap-3 border border-emerald-500/10 bg-zinc-900/50 p-4 transition hover:border-emerald-500/30"
+              className="flex flex-col gap-4 rounded-lg border border-emerald-500/10 bg-zinc-50 p-4 transition hover:border-emerald-500/30 dark:bg-zinc-900/50"
             >
               <div className="flex items-center justify-between">
-                <span className="text-xs font-mono text-zinc-500">
+                <span className="text-xs font-semibold text-zinc-500 dark:text-zinc-400">
                   {formatAccountId(swap.creator_account)}
+                </span>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-600/70 dark:text-emerald-400/50">
+                  Active
                 </span>
               </div>
               
-              <div className="flex items-center justify-between text-sm">
-                <div className="font-bold text-emerald-400">
-                  {swap.offering_amount} {swap.offering_asset}
+              <div className="flex items-center justify-between rounded-md bg-white p-3 shadow-sm dark:bg-zinc-950">
+                <div className="flex flex-col">
+                  <span className="text-[10px] font-bold uppercase text-zinc-400">Offering</span>
+                  <div className="font-bold text-emerald-700 dark:text-emerald-400">
+                    {swap.offering_amount} {swap.offering_asset}
+                  </div>
                 </div>
-                <ArrowRight className="h-4 w-4 text-zinc-600 mx-2" />
-                <div className="font-bold text-emerald-400">
-                  {swap.requesting_amount} {swap.requesting_asset}
+                <ArrowRight className="h-5 w-5 text-emerald-300 dark:text-emerald-800 mx-4 shrink-0" />
+                <div className="flex flex-col text-right">
+                  <span className="text-[10px] font-bold uppercase text-zinc-400">Asking</span>
+                  <div className="font-bold text-emerald-700 dark:text-emerald-400">
+                    {swap.requesting_amount} {swap.requesting_asset}
+                  </div>
                 </div>
               </div>
 
               <button
                 onClick={() => handleTakeTrade(swap.note_id)}
                 disabled={isFulfilling === swap.note_id}
-                className="mt-2 w-full inline-flex items-center justify-center border border-emerald-500/40 bg-emerald-950/20 px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-emerald-300 transition hover:bg-emerald-500/20 disabled:opacity-50"
+                className="mt-1 w-full inline-flex min-h-[36px] items-center justify-center rounded-md border border-emerald-500/30 bg-emerald-50 px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-emerald-700 transition hover:bg-emerald-100 disabled:opacity-50 dark:border-emerald-500/40 dark:bg-emerald-950/30 dark:text-emerald-300 dark:hover:bg-emerald-500/20"
               >
                 {isFulfilling === swap.note_id ? (
                   <Loader2 className="h-3 w-3 animate-spin mr-2" />
