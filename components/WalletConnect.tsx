@@ -14,6 +14,8 @@ function truncateAccountId(accountId: string): string {
   return `${accountId.slice(0, 10)}...${accountId.slice(-6)}`;
 }
 
+import { createMidenWallet } from "@/lib/miden/client";
+
 export default function WalletConnect({ onConnect }: WalletConnectProps) {
   const [accountId, setAccountId] = useState<string | null>(null);
   const [isConnecting, setIsConnecting] = useState(false);
@@ -24,16 +26,19 @@ export default function WalletConnect({ onConnect }: WalletConnectProps) {
     setError(null);
 
     try {
-      // Simulate connecting to the Miden Wallet Extension
-      // In production, this would be: await window.miden.request({ method: 'miden_requestAccounts' })
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-      
-      const simulatedId = `miden1${crypto.randomUUID().replace(/-/g, "").slice(0, 32)}`;
-      
-      setAccountId(simulatedId);
-      onConnect(simulatedId);
+      if (typeof window !== 'undefined' && (window as any).miden) {
+         // Attempt to use extension if injected
+         const accounts = await (window as any).miden.request({ method: 'miden_requestAccounts' });
+         setAccountId(accounts[0]);
+         onConnect(accounts[0]);
+      } else {
+         // Fallback to generating a REAL Miden wallet in the browser via SDK
+         const account = await createMidenWallet();
+         setAccountId(account.id);
+         onConnect(account.id);
+      }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not connect to Miden Wallet Extension.");
+      setError(err instanceof Error ? err.message : "Could not connect to Miden network.");
     } finally {
       setIsConnecting(false);
     }
