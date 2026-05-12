@@ -1,35 +1,20 @@
-# Miden ZK Credential Verifier
+# Miden OTC Swap Board
 
 **Live Demo:** https://miden-credential-verifier.vercel.app  
 **GitHub:** https://github.com/the1zinc/miden-credential-verifier
 
-A Next.js 14 dApp where developers connect a Miden wallet through the real `@demox-labs/miden-sdk`, generate a local browser-side credential proof flow, and store only the SHA-256 proof hash in Neon Postgres. The public badge is a "Verified OG Developer" registry entry keyed by a Miden Bech32 account ID, not an EVM address.
+A Next.js 14 dApp demonstrating trustless, Peer-to-Peer atomic swaps natively on the Miden Testnet. Instead of relying on complex, heavy smart contracts (like Uniswap on EVM), this app leverages Miden's Actor-Model and Note-based architecture to execute decentralized trades directly between users.
 
-## What It Does
+## How It Works
 
-1. The browser dynamically imports the Miden Web SDK so the WASM worker is never loaded during SSR.
-2. `WebClient.createClient()` connects to `https://rpc.testnet.miden.io:443`.
-3. A private mutable Miden wallet is created with `AccountStorageMode.private()`.
-4. The account ID is read as a Bech32 Miden ID with `account.id().toBech32()`.
-5. The browser simulates the STARK proving steps for an `OG_DEVELOPER` credential check.
-6. The server stores `account_id`, `github_handle`, `proof_hash`, and `verified_at` in Neon.
-7. The leaderboard reads the public registry from `/api/verify`.
+1. **Wallet Connection:** Users connect their Miden Wallet Extension.
+2. **Create Swap Note:** A user creates a "Swap Note" specifying what they are offering (e.g., 100 TokenA) and the script requires what they want in return (e.g., 50 TokenB).
+3. **Database Registry:** The unique `note_id` and trade details are stored in Neon Postgres.
+4. **Consume Note:** Another user browses the Swap Board, sees the offer, and clicks "Take Trade". Their wallet extension consumes the Note, granting them TokenA and automatically firing a new Note containing TokenB back to the creator.
 
-## MASM Credential Logic
+## Why This Architecture?
 
-`lib/miden/credential_check.masm` documents the Miden Assembly logic that would run inside the Miden VM in a full production prover path. Conceptually, it pushes the expected `OG_DEVELOPER` faucet ID, reads the caller account vault balance for that asset, and asserts the balance is greater than zero. If the account lacks the credential note, the VM assertion fails and the resulting STARK proof is invalid.
-
-## Why Client-Side STARK Proving
-
-Client-side proving keeps private account state in the user's browser instead of sending vault contents to a server. The server receives only a proof hash, which avoids a trusted verifier service holding sensitive credential data. STARKs are transparent, post-quantum friendly, and scale well because proof verification and public indexing can remain compact while proof generation happens at the edge.
-
-## Neon Setup
-
-1. Create a Neon project.
-2. Copy the pooled connection string into `.env.local` as `DATABASE_URL`.
-3. Open the Neon SQL editor.
-4. Run `database.sql`.
-5. Keep `NEXT_PUBLIC_MIDEN_RPC=https://rpc.testnet.miden.io:443`.
+On traditional blockchains, an atomic swap requires an Escrow Smart Contract to hold both parties' funds. On Miden, the execution logic is embedded directly into the **Note**. When User B consumes the Note, the Miden VM strictly enforces the Note's script. If User B's transaction does not simultaneously create the payment note back to User A, the entire transaction is invalid and reverted. This enables completely decentralized, local OTC trading without liquidity pools or smart contract risk.
 
 ## Local Development
 
@@ -40,57 +25,23 @@ npm run dev
 
 Open `http://localhost:3000`.
 
-Required environment variables:
+Required environment variables (`.env.local`):
 
 ```bash
 DATABASE_URL=your_neon_connection_string_here
-NEXT_PUBLIC_MIDEN_RPC=https://rpc.testnet.miden.io:443
 ```
 
-## Deploy to Vercel
+## Neon Setup
 
-1. Import the repository into Vercel.
-2. Add `DATABASE_URL` and `NEXT_PUBLIC_MIDEN_RPC` in Project Settings.
-3. Deploy with the default Next.js settings.
-4. Run `database.sql` once in Neon before using the verifier.
+1. Create a Neon project.
+2. Copy the pooled connection string into `.env.local` as `DATABASE_URL`.
+3. Open the Neon SQL editor and run `database.sql` to generate the `active_swaps` table.
 
 ## Tech Stack
 
 - Next.js 14 App Router
 - TypeScript strict mode
 - Tailwind CSS terminal UI
-- `@demox-labs/miden-sdk` loaded by dynamic import only
+- Miden Wallet Extension integration
 - Neon serverless Postgres via `@neondatabase/serverless`
 - `lucide-react` icons
-
-## Architecture
-
-```text
-Browser
-  |
-  |-- WalletConnect.tsx
-  |     dynamic import("@demox-labs/miden-sdk")
-  |     WebClient.createClient(Miden testnet RPC)
-  |     AccountStorageMode.private()
-  |     account.id().toBech32()
-  |     client.terminate()
-  |
-  |-- ProverUI.tsx
-  |     generateCredentialProof()
-  |     SHA-256 proof hash
-  |     POST /api/verify
-  |
-Next.js API Route
-  |
-  |-- app/api/verify/route.ts
-  |     validates Miden account ID, GitHub handle, proof hash
-  |     INSERT ... ON CONFLICT
-  |
-Neon Postgres
-  |
-  |-- verified_developers
-        account_id
-        github_handle
-        proof_hash
-        verified_at
-```

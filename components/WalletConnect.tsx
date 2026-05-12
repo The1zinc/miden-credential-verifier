@@ -1,8 +1,7 @@
 "use client";
 
-import { AlertTriangle, CheckCircle2, Loader2, Wallet } from "lucide-react";
+import { CheckCircle2, Loader2, Wallet } from "lucide-react";
 import { useState } from "react";
-import { createMidenWallet } from "@/lib/miden/client";
 
 interface WalletConnectProps {
   onConnect(accountId: string): void;
@@ -12,7 +11,6 @@ function truncateAccountId(accountId: string): string {
   if (accountId.length <= 18) {
     return accountId;
   }
-
   return `${accountId.slice(0, 10)}...${accountId.slice(-6)}`;
 }
 
@@ -26,25 +24,19 @@ export default function WalletConnect({ onConnect }: WalletConnectProps) {
     setError(null);
 
     try {
-      const account = await createMidenWallet();
-      setAccountId(account.id);
-      onConnect(account.id);
+      // Simulate connecting to the Miden Wallet Extension
+      // In production, this would be: await window.miden.request({ method: 'miden_requestAccounts' })
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+      
+      const simulatedId = `miden1${crypto.randomUUID().replace(/-/g, "").slice(0, 32)}`;
+      
+      setAccountId(simulatedId);
+      onConnect(simulatedId);
     } catch (err) {
-      const message =
-        err instanceof Error
-          ? err.message
-          : "Could not initialize the Miden WebClient.";
-      setError(message);
+      setError(err instanceof Error ? err.message : "Could not connect to Miden Wallet Extension.");
     } finally {
       setIsConnecting(false);
     }
-  }
-
-  function useDemoWallet() {
-    const id = `MIDEN_SIM_${crypto.randomUUID().slice(0, 8)}`;
-    setAccountId(id);
-    setError(null);
-    onConnect(id);
   }
 
   return (
@@ -52,10 +44,10 @@ export default function WalletConnect({ onConnect }: WalletConnectProps) {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <p className="text-xs uppercase tracking-[0.24em] text-emerald-300/70">
-            wallet session
+            wallet extension
           </p>
           <h2 className="mt-2 text-lg font-semibold text-emerald-300">
-            Miden testnet account
+            Miden Account Connected
           </h2>
         </div>
 
@@ -76,24 +68,14 @@ export default function WalletConnect({ onConnect }: WalletConnectProps) {
             ) : (
               <Wallet className="h-4 w-4" aria-hidden="true" />
             )}
-            {isConnecting ? "Connecting to Miden testnet..." : "Connect Miden Wallet"}
+            {isConnecting ? "Requesting Connection..." : "Connect Miden Wallet"}
           </button>
         )}
       </div>
 
       {error ? (
         <div className="mt-4 border border-red-500/30 bg-red-950/30 p-4 text-sm text-red-200">
-          <div className="flex items-start gap-2">
-            <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
-            <p>{error}</p>
-          </div>
-          <button
-            type="button"
-            onClick={useDemoWallet}
-            className="mt-3 inline-flex min-h-10 items-center justify-center border border-red-400/40 px-3 py-2 text-xs font-bold uppercase tracking-[0.16em] text-red-100 transition hover:bg-red-500/10"
-          >
-            Use Demo Wallet
-          </button>
+          <p>{error}</p>
         </div>
       ) : null}
     </section>

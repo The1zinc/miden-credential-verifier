@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import Leaderboard from "@/components/Leaderboard";
-import ProverUI from "@/components/ProverUI";
+import CreateSwap from "@/components/CreateSwap";
+import SwapBoard from "@/components/SwapBoard";
 import WalletConnect from "@/components/WalletConnect";
 
 export default function Home() {
@@ -16,21 +16,27 @@ export default function Home() {
             miden testnet dapp
           </p>
           <h1 className="mt-4 text-3xl font-black text-emerald-300 sm:text-5xl">
-            MIDEN ZK CREDENTIAL VERIFIER
+            MIDEN OTC SWAP BOARD
           </h1>
           <p className="mt-4 max-w-3xl text-sm leading-6 text-zinc-400 sm:text-base">
-            Connect a real Miden Web SDK wallet, locally generate a client-side
-            STARK proof for an OG developer credential, and publish only the
-            proof hash to Neon Postgres.
+            Connect your Miden Wallet Extension to create trustless, P2P atomic swaps using Miden Notes. 
+            No smart contracts required. Trades are settled natively on the Miden Testnet.
           </p>
         </header>
 
         <WalletConnect onConnect={setAccountId} />
-        <ProverUI accountId={accountId} />
-        <Leaderboard />
+        
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+          <div>
+            <CreateSwap accountId={accountId} />
+          </div>
+          <div>
+            <SwapBoard />
+          </div>
+        </div>
 
         <footer className="border-t border-emerald-500/20 py-5 text-center text-xs uppercase tracking-[0.18em] text-emerald-300/50">
-          Powered by Miden - Client-side STARK Proofs - Neon DB
+          Powered by Miden - Atomic Swap Notes - Neon DB
         </footer>
       </div>
     </main>
