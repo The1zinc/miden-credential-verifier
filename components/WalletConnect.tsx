@@ -1,10 +1,12 @@
 "use client";
 
-import { CheckCircle2, Loader2, Wallet, AlertTriangle } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { WalletMultiButton } from "@demox-labs/miden-wallet-adapter-reactui";
+import { useWallet } from "@demox-labs/miden-wallet-adapter-react";
+import { AlertTriangle, CheckCircle2 } from "lucide-react";
 
 interface WalletConnectProps {
-  onConnect(accountId: string): void;
+  onConnect(accountId: string | null): void;
 }
 
 function truncateAccountId(accountId: string): string {
@@ -15,41 +17,24 @@ function truncateAccountId(accountId: string): string {
 }
 
 export default function WalletConnect({ onConnect }: WalletConnectProps) {
-  const [accountId, setAccountId] = useState<string | null>(null);
-  const [isConnecting, setIsConnecting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const { connected, address } = useWallet();
+  const [demoAddress, setDemoAddress] = useState<string | null>(null);
 
-  async function connectWallet() {
-    setIsConnecting(true);
-    setError(null);
-
-    try {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      if (typeof window !== 'undefined' && (window as any).miden) {
-         // Attempt to use extension if injected
-         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-         const accounts = await (window as any).miden.request({ method: 'miden_requestAccounts' });
-         if (accounts && accounts.length > 0) {
-           setAccountId(accounts[0]);
-           onConnect(accounts[0]);
-         } else {
-           throw new Error("No accounts found in Miden Wallet");
-         }
-      } else {
-         throw new Error("Miden Browser Wallet Extension not found. Please install the Devnet extension.");
-      }
-    } catch {
-      setError("Could not connect to Miden network. Please ensure the extension is installed.");
-      setIsConnecting(false);
+  // Sync official wallet state to parent
+  useEffect(() => {
+    if (connected && address) {
+      onConnect(address);
+      setDemoAddress(null); // Clear demo if real wallet connects
+    } else if (demoAddress) {
+      onConnect(demoAddress);
+    } else {
+      onConnect(null);
     }
-  }
+  }, [connected, address, demoAddress, onConnect]);
 
   function useDemoWallet() {
-    // Demo wallet must start with miden1 to pass API validation
     const id = `miden1sim${crypto.randomUUID().replace(/-/g, "").slice(0, 24)}`;
-    setAccountId(id);
-    setError(null);
-    onConnect(id);
+    setDemoAddress(id);
   }
 
   return (
@@ -64,35 +49,28 @@ export default function WalletConnect({ onConnect }: WalletConnectProps) {
           </h2>
         </div>
 
-        {accountId ? (
-          <div className="inline-flex items-center gap-2 rounded-md border border-emerald-500/40 bg-emerald-500/10 px-3 py-2 text-sm font-medium text-emerald-200">
-            <CheckCircle2 className="h-4 w-4" aria-hidden="true" />
-            <span>{truncateAccountId(accountId)}</span>
-          </div>
-        ) : (
-          <button
-            type="button"
-            onClick={connectWallet}
-            disabled={isConnecting}
-            className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md border border-emerald-500/50 bg-emerald-500 px-6 py-2 text-sm font-bold text-zinc-950 shadow-sm transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:border-emerald-900 disabled:bg-zinc-900 disabled:text-emerald-700"
-          >
-            {isConnecting ? (
-              <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
-            ) : (
-              <Wallet className="h-4 w-4" aria-hidden="true" />
-            )}
-            {isConnecting ? "Connecting..." : "Connect Miden Wallet"}
-          </button>
-        )}
+        <div className="flex items-center gap-4">
+          {demoAddress ? (
+            <div className="inline-flex items-center gap-2 rounded-md border border-emerald-500/40 bg-emerald-500/10 px-3 py-2 text-sm font-medium text-emerald-200">
+              <CheckCircle2 className="h-4 w-4" aria-hidden="true" />
+              <span>{truncateAccountId(demoAddress)} (Demo)</span>
+            </div>
+          ) : (
+            <WalletMultiButton />
+          )}
+        </div>
       </div>
 
-      {error ? (
+      {!connected && !demoAddress ? (
         <div className="mt-6 rounded-md border border-red-500/30 bg-red-950/30 p-4 text-sm text-red-200">
           <div className="flex items-start gap-3">
             <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
             <div>
-              <p className="font-semibold">Connection Error</p>
-              <p className="mt-1">{error}</p>
+              <p className="font-semibold">Miden Extension Required</p>
+              <p className="mt-1">
+                Please install the Miden Browser Wallet and connect using the button above. 
+                If you do not have it, use the demo wallet to test the UI.
+              </p>
             </div>
           </div>
           <button

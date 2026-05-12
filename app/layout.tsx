@@ -7,6 +7,8 @@ export const metadata: Metadata = {
     "Client-side Miden STARK proof verifier for OG developer credentials.",
 };
 
+import AppWalletProvider from "@/components/AppWalletProvider";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -15,7 +17,9 @@ export default function RootLayout({
   return (
     <html lang="en" className="h-full antialiased dark">
       <body className="min-h-full bg-zinc-950 text-emerald-400 selection:bg-emerald-500/30">
-        {children}
+        <AppWalletProvider>
+          {children}
+        </AppWalletProvider>
       </body>
     </html>
   );
