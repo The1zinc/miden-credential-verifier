@@ -30,8 +30,18 @@ export default function CreateSwap({ accountId }: CreateSwapProps) {
 
     try {
       // Simulate interaction with the Miden Wallet Extension
+      const miden = (window as any).miden;
+      if (miden) {
+        try {
+          // Attempt to prompt the real wallet for confirmation
+          await miden.request({ method: "miden_requestAccounts" });
+        } catch (e) {
+          console.warn("Wallet prompt issue:", e);
+        }
+      }
+      
       // Real flow: window.miden.createNote({...})
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      await new Promise((resolve) => setTimeout(resolve, 1500));
       
       const simulatedNoteId = `0x${crypto.randomUUID().replace(/-/g, "")}`;
 

@@ -78,3 +78,27 @@ export async function POST(request: Request) {
     );
   }
 }
+
+export async function PATCH(request: Request) {
+  try {
+    const { note_id } = await request.json();
+    
+    if (!note_id) {
+      return NextResponse.json({ error: "Missing note_id" }, { status: 400 });
+    }
+
+    await sql`
+      UPDATE active_swaps 
+      SET status = 'fulfilled' 
+      WHERE note_id = ${note_id}
+    `;
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error("Failed to fulfill swap:", error);
+    return NextResponse.json(
+      { error: "Failed to update swap status" },
+      { status: 500 }
+    );
+  }
+}

@@ -43,11 +43,37 @@ export default function SwapBoard() {
 
   async function handleTakeTrade(noteId: string) {
     setIsFulfilling(noteId);
-    // Simulate wallet extension consumption of the note
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-    alert(`Wallet Extension Simulated:\nConsumed Note: ${noteId}\nSwap Successful!`);
-    setIsFulfilling(null);
-    fetchSwaps();
+    try {
+      // If real Miden extension is present, try to prompt it
+      const miden = (window as any).miden;
+      if (miden) {
+        try {
+          // Attempt to prompt the wallet (this is a placeholder for the actual SDK sign method)
+          await miden.request({ method: "miden_requestAccounts" });
+        } catch (e) {
+          console.warn("Wallet prompt issue:", e);
+        }
+      }
+
+      // Simulate wallet processing delay
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+
+      const res = await fetch("/api/swaps", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ note_id: noteId }),
+      });
+
+      if (!res.ok) throw new Error("Failed to fulfill swap");
+
+      // alert(`Wallet Extension Confirmed:\nConsumed Note: ${noteId}\nSwap Successful!`);
+    } catch (err) {
+      console.error(err);
+      alert("Error fulfilling swap note.");
+    } finally {
+      setIsFulfilling(null);
+      fetchSwaps();
+    }
   }
 
   function formatAccountId(id: string) {
