@@ -41,10 +41,10 @@ export async function POST(request: Request) {
       );
     }
 
-    // Basic Bech32 prefix validation for Miden Account ID (extension uses mm1, demo uses miden1sim)
-    if (!creator_account.startsWith("miden1") && !creator_account.startsWith("mm1")) {
+    // Validate account ID is a non-empty string (real extension returns hex, demo returns miden1sim...)
+    if (typeof creator_account !== "string" || creator_account.trim().length < 6) {
       return NextResponse.json(
-        { error: "Invalid Miden Account ID format" },
+        { error: "Invalid Miden Account ID" },
         { status: 400 }
       );
     }
