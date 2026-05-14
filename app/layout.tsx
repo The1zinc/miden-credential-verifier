@@ -1,13 +1,12 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import AppWalletProvider from "@/components/AppWalletProvider";
+import { ThemeProvider } from "@/components/ThemeProvider";
 
 export const metadata: Metadata = {
-  title: "Miden ZK Credential Verifier",
-  description:
-    "Client-side Miden STARK proof verifier for OG developer credentials.",
+  title: "Miden OTC Swap Board",
+  description: "Trustless P2P atomic swaps on Miden Testnet using ZK notes.",
 };
-
-import AppWalletProvider from "@/components/AppWalletProvider";
 
 export default function RootLayout({
   children,
@@ -15,11 +14,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="h-full antialiased dark">
-      <body className="min-h-full bg-zinc-950 text-emerald-400 selection:bg-emerald-500/30">
-        <AppWalletProvider>
-          {children}
-        </AppWalletProvider>
+    <html lang="en" className="h-full antialiased dark" suppressHydrationWarning>
+      <body className="min-h-full transition-colors">
+        <ThemeProvider>
+          <AppWalletProvider>
+            {children}
+          </AppWalletProvider>
+        </ThemeProvider>
       </body>
     </html>
   );
