@@ -37,9 +37,11 @@ export default function CreateSwap({ accountId }: CreateSwapProps) {
       if (connected && signBytes) {
         try {
           // Attempt to trigger a signature popup from the real extension
-          const msg = new TextEncoder().encode("Approve creating this Miden Swap Note");
+          // Miden "word" expects 32 bytes, so we pad it to exactly 32 bytes
+          const msgString = "Approve Miden Swap".padEnd(32, " ");
+          const msg = new TextEncoder().encode(msgString);
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          await signBytes(msg, 0 as any); // Use 0 for arbitrary message if enum is unknown
+          await signBytes(msg, "word" as any);
           confirmed = true;
         } catch (e: unknown) {
           console.warn("Wallet signing issue:", e);
