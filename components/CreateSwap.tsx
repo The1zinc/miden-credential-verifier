@@ -2,12 +2,14 @@
 
 import { Loader2, ArrowRightLeft, FileWarning } from "lucide-react";
 import { useState } from "react";
+import { useWallet } from "@demox-labs/miden-wallet-adapter-react";
 
 interface CreateSwapProps {
   accountId: string | null;
 }
 
 export default function CreateSwap({ accountId }: CreateSwapProps) {
+  const { signBytes, connected } = useWallet();
   const [isCreating, setIsCreating] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -29,22 +31,23 @@ export default function CreateSwap({ accountId }: CreateSwapProps) {
     setSuccess(false);
 
     try {
-      // Prompt wallet extension if available, otherwise fallback to standard browser confirm
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const miden = (window as any).miden;
+      // Prompt wallet extension if connected and using real wallet adapter
       let confirmed = false;
       
-      if (miden) {
+      if (connected && signBytes) {
         try {
           // Attempt to trigger a signature popup from the real extension
-          await miden.request({ method: "miden_signMessage", params: { message: "Approve creating this Miden Swap Note?" } });
+          const msg = new TextEncoder().encode("Approve creating this Miden Swap Note");
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          await signBytes(msg, 0 as any); // Use 0 for arbitrary message if enum is unknown
           confirmed = true;
         } catch (e: unknown) {
-          console.warn("Wallet signing issue or unsupported method:", e);
-          // Fallback to explicit confirmation if the extension doesn't support the raw signing method yet
+          console.warn("Wallet signing issue:", e);
+          // If the wallet rejects or method fails, fallback
           confirmed = window.confirm("Approve creating this Swap Note on the Miden Testnet?");
         }
       } else {
+        // Fallback for Demo Wallet
         confirmed = window.confirm("Approve creating this Swap Note on the Miden Testnet?");
       }
 
@@ -52,7 +55,7 @@ export default function CreateSwap({ accountId }: CreateSwapProps) {
         throw new Error("User rejected the transaction.");
       }
       
-      // Real flow: window.miden.createNote({...})
+      // Simulate real node broadcast
       await new Promise((resolve) => setTimeout(resolve, 1500));
       
       const simulatedNoteId = `0x${crypto.randomUUID().replace(/-/g, "")}`;

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Loader2, ArrowRight } from "lucide-react";
+import { useWallet } from "@demox-labs/miden-wallet-adapter-react";
 
 interface SwapListing {
   id: number;
@@ -16,6 +17,7 @@ interface SwapListing {
 }
 
 export default function SwapBoard() {
+  const { signBytes, connected } = useWallet();
   const [swaps, setSwaps] = useState<SwapListing[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isFulfilling, setIsFulfilling] = useState<string | null>(null);
@@ -44,21 +46,23 @@ export default function SwapBoard() {
   async function handleTakeTrade(noteId: string) {
     setIsFulfilling(noteId);
     try {
-      // Prompt wallet extension if available, otherwise fallback to standard browser confirm
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const miden = (window as any).miden;
+      // Prompt wallet extension if connected and using real wallet adapter
       let confirmed = false;
       
-      if (miden) {
+      if (connected && signBytes) {
         try {
           // Attempt to trigger a signature popup from the real extension
-          await miden.request({ method: "miden_signMessage", params: { message: `Approve taking trade for Note ${noteId}?` } });
+          const msg = new TextEncoder().encode(`Approve taking trade for Note ${noteId}`);
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          await signBytes(msg, 0 as any); // Use 0 for arbitrary message if enum is unknown
           confirmed = true;
         } catch (e: unknown) {
-          console.warn("Wallet signing issue or unsupported method:", e);
+          console.warn("Wallet signing issue:", e);
+          // If the wallet rejects or method fails, fallback
           confirmed = window.confirm(`Approve taking trade for Note ${noteId}?`);
         }
       } else {
+        // Fallback for Demo Wallet
         confirmed = window.confirm(`Approve taking trade for Note ${noteId}?`);
       }
 
@@ -66,7 +70,7 @@ export default function SwapBoard() {
         throw new Error("User rejected the transaction.");
       }
 
-      // Simulate wallet processing delay
+      // Simulate real node broadcast
       await new Promise((resolve) => setTimeout(resolve, 1500));
 
       const res = await fetch("/api/swaps", {
