@@ -29,15 +29,27 @@ export default function CreateSwap({ accountId }: CreateSwapProps) {
     setSuccess(false);
 
     try {
-      // Simulate interaction with the Miden Wallet Extension
+      // Prompt wallet extension if available, otherwise fallback to standard browser confirm
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const miden = (window as any).miden;
+      let confirmed = false;
+      
       if (miden) {
         try {
-          // Attempt to prompt the real wallet for confirmation
-          await miden.request({ method: "miden_requestAccounts" });
-        } catch (e) {
-          console.warn("Wallet prompt issue:", e);
+          // Attempt to trigger a signature popup from the real extension
+          await miden.request({ method: "miden_signMessage", params: { message: "Approve creating this Miden Swap Note?" } });
+          confirmed = true;
+        } catch (e: unknown) {
+          console.warn("Wallet signing issue or unsupported method:", e);
+          // Fallback to explicit confirmation if the extension doesn't support the raw signing method yet
+          confirmed = window.confirm("Approve creating this Swap Note on the Miden Testnet?");
         }
+      } else {
+        confirmed = window.confirm("Approve creating this Swap Note on the Miden Testnet?");
+      }
+
+      if (!confirmed) {
+        throw new Error("User rejected the transaction.");
       }
       
       // Real flow: window.miden.createNote({...})

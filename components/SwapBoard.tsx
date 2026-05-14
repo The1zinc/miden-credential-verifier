@@ -44,15 +44,26 @@ export default function SwapBoard() {
   async function handleTakeTrade(noteId: string) {
     setIsFulfilling(noteId);
     try {
-      // If real Miden extension is present, try to prompt it
+      // Prompt wallet extension if available, otherwise fallback to standard browser confirm
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const miden = (window as any).miden;
+      let confirmed = false;
+      
       if (miden) {
         try {
-          // Attempt to prompt the wallet (this is a placeholder for the actual SDK sign method)
-          await miden.request({ method: "miden_requestAccounts" });
-        } catch (e) {
-          console.warn("Wallet prompt issue:", e);
+          // Attempt to trigger a signature popup from the real extension
+          await miden.request({ method: "miden_signMessage", params: { message: `Approve taking trade for Note ${noteId}?` } });
+          confirmed = true;
+        } catch (e: unknown) {
+          console.warn("Wallet signing issue or unsupported method:", e);
+          confirmed = window.confirm(`Approve taking trade for Note ${noteId}?`);
         }
+      } else {
+        confirmed = window.confirm(`Approve taking trade for Note ${noteId}?`);
+      }
+
+      if (!confirmed) {
+        throw new Error("User rejected the transaction.");
       }
 
       // Simulate wallet processing delay
